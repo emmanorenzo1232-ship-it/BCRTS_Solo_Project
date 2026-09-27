@@ -1,0 +1,7 @@
+# Backend
+cd backend
+.venv/bin/uvicorn app.main:app --reload
+
+# Frontend
+cd frontend
+npm run dev
