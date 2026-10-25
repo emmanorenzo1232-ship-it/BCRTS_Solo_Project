@@ -7,3 +7,17 @@ add new terminal
 cd frontend
 
 npm.cmd run dev
+
+
+#how to open database:
+
+sqlite3 backend/bcrts.db        
+
+*commands
+
+.databases
+.tables
+.quit
+
+*queries
+select * from <table-name>
