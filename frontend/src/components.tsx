@@ -1,5 +1,6 @@
-import { Link, Navigate, Outlet } from 'react-router-dom'
+import { Link, Navigate, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from './auth'
+import { formatAppointmentDate, formatAppointmentTime } from './dates'
 import type { CaseRecord, CaseStatus, Role } from './types'
 
 export function ProtectedRoute({ role }: { role?: Role }) {
@@ -24,6 +25,10 @@ export function Layout() {
           <button className="button ghost compact" onClick={logout}>Log out</button>
         </div>
       </header>
+      {user?.role === 'staff' && <nav className="staff-nav" aria-label="Staff navigation">
+        <NavLink to="/staff" end>Case queue</NavLink>
+        <NavLink to="/staff/appointments">Service appointments</NavLink>
+      </nav>}
       <main className="main"><Outlet /></main>
     </div>
   )
@@ -33,16 +38,21 @@ export function StatusBadge({ status }: { status: CaseStatus }) {
   return <span className={`badge status-${status.toLowerCase().replace(' ', '-')}`}>{status}</span>
 }
 
+export function AppointmentBadge({ status }: { status: CaseRecord['appointment_status'] }) {
+  return <span className={`badge appointment-${status?.toLowerCase() ?? 'upcoming'}`}>{status ?? 'Scheduled'}</span>
+}
+
 export function CaseCard({ item }: { item: CaseRecord }) {
   return (
     <Link className="case-card" to={`/cases/${item.id}`}>
       <div>
         <small className="eyebrow">{item.reference_number}</small>
         <h3>{item.subject}</h3>
+        {item.appointment_date && <p>Confirmed appointment: <time dateTime={item.appointment_date}>{formatAppointmentDate(item.appointment_date)}</time>{item.appointment_time && ` at ${formatAppointmentTime(item.appointment_time)}`}</p>}
         <p>{item.category} · {item.type}</p>
       </div>
       <div className="case-meta">
-        <StatusBadge status={item.status} />
+        {item.type === 'request' && item.appointment_date ? <AppointmentBadge status={item.appointment_status} /> : <StatusBadge status={item.status} />}
         <time>{new Date(item.created_at).toLocaleDateString()}</time>
       </div>
     </Link>

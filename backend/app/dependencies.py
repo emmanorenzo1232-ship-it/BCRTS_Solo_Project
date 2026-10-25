@@ -27,7 +27,9 @@ async def get_current_user(
     if user_id is None:
         raise error
     user = await db.get(User, user_id)
-    if user is None:
+    if user is None or decode_access_token(
+        credentials.credentials, request.app.state.settings.jwt_secret, user.password_hash
+    ) is None:
         raise error
     return user
 

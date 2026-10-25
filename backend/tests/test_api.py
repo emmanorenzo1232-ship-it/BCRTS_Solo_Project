@@ -100,3 +100,36 @@ async def test_data_persists_for_a_new_app_instance(client, resident):
 
     assert persisted.status_code == 200
     assert persisted.json()[0]["reference_number"] == created.json()["reference_number"]
+
+
+async def test_case_history_and_staff_notes(client, resident, staff):
+    created = await create_case(client, resident)
+    case_id = created.json()["id"]
+
+    initial_history = await client.get(f"/api/cases/{case_id}/history", headers=auth(resident))
+    assert initial_history.status_code == 200
+    assert [(event["from_status"], event["to_status"]) for event in initial_history.json()] == [
+        (None, "Received")
+    ]
+
+    posted = await client.post(
+        f"/api/cases/{case_id}/notes",
+        headers=auth(staff),
+        json={"body": "The drainage team has been notified."},
+    )
+    assert posted.status_code == 201
+    assert posted.json()["author"]["role"] == "staff"
+
+    resident_notes = await client.get(f"/api/cases/{case_id}/notes", headers=auth(resident))
+    assert resident_notes.json()[0]["body"] == "The drainage team has been notified."
+
+    await client.patch(
+        f"/api/cases/{case_id}/status",
+        headers=auth(staff),
+        json={"status": "In Progress"},
+    )
+    updated_history = await client.get(f"/api/cases/{case_id}/history", headers=auth(resident))
+    assert [(event["from_status"], event["to_status"]) for event in updated_history.json()] == [
+        (None, "Received"),
+        ("Received", "In Progress"),
+    ]

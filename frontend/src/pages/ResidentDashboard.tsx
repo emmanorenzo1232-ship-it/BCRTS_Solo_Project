@@ -23,7 +23,7 @@ export function ResidentDashboard() {
       </section>
       <section className="summary-grid">
         <div className="stat"><strong>{cases.length}</strong><span>Total submitted</span></div>
-        <div className="stat"><strong>{cases.filter((c) => ['Received', 'In Progress'].includes(c.status)).length}</strong><span>Active cases</span></div>
+        <div className="stat"><strong>{cases.filter((c) => c.appointment_status ? c.appointment_status !== 'Past' : ['Received', 'In Progress'].includes(c.status)).length}</strong><span>Active concerns and appointments</span></div>
         <div className="stat"><strong>{cases.filter((c) => ['Resolved', 'Closed'].includes(c.status)).length}</strong><span>Completed</span></div>
       </section>
       <section className="section-card">

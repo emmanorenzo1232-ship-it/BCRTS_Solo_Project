@@ -1,0 +1,9 @@
+cd backend 
+
+.\.venv\Scripts\uvicorn.exe app.main:app --reload
+
+add new terminal
+
+cd frontend
+
+npm.cmd run dev
